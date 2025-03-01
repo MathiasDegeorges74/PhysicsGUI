@@ -30,15 +30,15 @@ int main()
 	Solution solutionEuler(system);
 	Solution solutionRK4(system);
 
-	solutionExact.setStepNumber(2);
+	solutionExact.setStepNumber(4);
 	solutionExact.setName("Exact");
 	solutionExact.initPosition();
 
-	solutionEuler.setStepNumber(40);
+	solutionEuler.setStepNumber(100);
 	solutionEuler.setName("Euler");
 	solutionEuler.initPosition();
 
-	solutionRK4.setStepNumber(40);
+	solutionRK4.setStepNumber(100);
 	solutionRK4.setName("RK4");
 	solutionRK4.initPosition();
 
@@ -103,18 +103,12 @@ int main()
 	double frameOverFlow = 0; // Track frame time filling compared to target FPS
 	double frameOverFlowMax = 0; // History of peak frame time filling compared to target FPS
 
-
-	// Stop before launch for stability
-	//while (elapsedTime.asSeconds() < 10)
-	//{
-	//	elapsedTime = clockGeneral.getElapsedTime();
-	//}
-	//elapsedTime = clockFrame.restart();
-	//timeSinceLastFrame = clockFrame.restart();
-
 	while (window.isOpen())
 	{
+
 		elapsedTime = clockGeneral.getElapsedTime();
+
+		std::cout << std::format("new frame at {0:.5f} s\n", elapsedTime.asSeconds());
 		// Check time as the begginig of the frame computing 
 		timeSinceLastFrame = clockFrame.restart();
 		fps = 1.0 / timeSinceLastFrame.asSeconds();
@@ -123,9 +117,10 @@ int main()
 		while (const std::optional event = window.pollEvent())
 		{
 			if (event->is<sf::Event::Closed>())
+			{
 				window.close();
+			}
 		}
-
 
 		solutionExact.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
 		solutionExact.initTimeRT();
@@ -160,7 +155,7 @@ int main()
 		textExact.setString(std::format("Exact : {0:.5f}", emExact));
 		textRK4.setString(std::format("RK4 : {0:.5f}", emRK4));
 		textEuler.setString(std::format("Euler : {0:.5f}", emEuler));
-	
+
 
 		// Draw all elements
 		window.clear();
@@ -197,6 +192,13 @@ int main()
 		{
 			frameElapsedTime = clockFrame.getElapsedTime();
 			//std::cout << std::format("FET (micros s) : {0:.5f} \n", frameElapsedTime.asSeconds() * 1000.0);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
+		{
+			solutionExact.initPosition();
+			solutionRK4.initPosition();
+			solutionEuler.initPosition();
+			clockGeneral.restart();
 		}
 	}
 }
