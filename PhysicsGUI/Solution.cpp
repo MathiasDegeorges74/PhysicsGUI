@@ -7,7 +7,6 @@
 using namespace std;
 
 
-
 #include "Gauss.hpp"
 
 void solveSystem(double y[N], double const& k, double const& m, double const& x, double const& v)
@@ -41,7 +40,7 @@ double calcNext_dx(const double& v)
 	return v;
 }
 
-Solution::Solution(System const& system, const double& tEnd, const double& dt) : m_system(system), m_tEnd(tEnd), m_dt(dt)
+Solution::Solution(System const& system, const double& t0, const double& tEnd, const double& dt) : m_system(system), m_t0(t0), m_tEnd(tEnd), m_dt(dt)
 {
 
 	// Time definition
@@ -77,14 +76,75 @@ Solution::Solution(System const& system, const double& tEnd, const double& dt) :
 
 Solution::~Solution() {}
 
-void Solution::solveEuler()
+void Solution::setName(std::string name)
 {
-	double dv, dx;
-	double y[N];
+	m_name = name;
+}
 
+void Solution::setTimeBoundaries(double t0, double tEnd)
+{
+	m_t0 = t0;
+	m_tEnd = tEnd;
+}
+
+void Solution::setStepTime(double dt)
+{//Set step time
+	m_dt = dt;
+}
+
+void Solution::setStepNumber(int n)
+//Set step number and compute step time
+{
+	m_n = n;
+}
+
+void Solution::computeStepTime()
+{//compute step time from t0, tEnd and step number
+	m_dt = (m_tEnd - m_t0) / double(m_n);
+	//std::cout << m_name << " : dt = " << m_dt << "s\n";
+}
+
+void Solution::computeStepNumber()
+{//compute step number from t0, tEnd and step time
+	m_n = m_tEnd / m_dt;
+}
+
+void Solution::initPosition()
+{
 	m_x[0] = m_system.getInitialPosition();
 	m_v[0] = 0;
+}
 
+void Solution::nextStep()
+{
+	m_x[0] = m_x[m_n - 1];
+	m_v[0] = m_v[m_n - 1];
+	//std::cout << m_name << " : x0 = " << m_x[0] << "m\n";
+}
+
+void Solution::initTime()
+{
+	computeStepNumber();
+	m_t[0] = m_t0;
+	for (int i = 0; i < m_n - 1;i++)
+	{
+		m_t[i + 1] = m_t[i] + m_dt;
+	}
+}
+
+void Solution::initTimeRT()
+{
+	computeStepTime();
+	m_t[0] = m_t0;
+	for (int i = 0; i < m_n - 1;i++)
+	{
+		m_t[i + 1] = m_t[i] + m_dt;
+	}
+}
+
+void Solution::solveEuler()
+{
+	double y[N];
 	double m = m_system.getMasse();
 	double k = m_system.getSpringStifness();
 
@@ -94,11 +154,6 @@ void Solution::solveEuler()
 
 		m_v[i + 1] = m_v[i] + y[0] * m_dt;
 		m_x[i + 1] = m_x[i] + y[1] * m_dt; //+ 0.5 * ddx * dt * dt;
-
-		//dv = calcNext_dv(k, m, m_x[i]);
-		//dx = calcNext_dx(m_v[i]);
-		//m_v[i + 1] = m_v[i] + dv * m_dt;
-		//m_x[i + 1] = m_x[i] + dx * m_dt; //+ 0.5 * ddx * dt * dt;
 	}
 
 }
@@ -106,17 +161,13 @@ void Solution::solveEuler()
 void Solution::solveRK4()
 {
 	double y1[N], y2[N], y3[N], y4[N];
-
-	//cout << y[0] << "\n";
-	m_x[0] = m_system.getInitialPosition();
-	m_v[0] = 0;
-
 	double m = m_system.getMasse();
 	double k = m_system.getSpringStifness();
 
 	for (int i = 0; i < m_n - 1;i++)
 	{
 		solveSystem(y1, k, m, m_x[i], m_v[i]);
+
 		solveSystem(y2, k, m, m_x[i] + y1[1] * m_dt / 2., m_v[i] + y1[0] * m_dt / 2.);
 		solveSystem(y3, k, m, m_x[i] + y2[1] * m_dt / 2., m_v[i] + y2[0] * m_dt / 2.);
 		solveSystem(y4, k, m, m_x[i] + y3[1] * m_dt, m_v[i] + y3[0] * m_dt);
@@ -135,6 +186,7 @@ void Solution::solveExact() {
 	{
 		m_x[i] = x0 * cos(sqrt(k / m) * m_t[i]);
 		m_v[i] = -sqrt(k / m) * x0 * sin(sqrt(k / m) * m_t[i]);
+
 	}
 }
 
@@ -184,6 +236,16 @@ void Solution::save(string const& filePath) const
 		cout << "Unable to open file!" << endl;
 	}
 
+}
+
+double Solution::getPosition()const
+{
+	return m_x[m_n - 1];
+}
+
+double Solution::getEm() const
+{
+	return m_Em[m_n - 1];
 }
 
 vector <double> Solution::getX()

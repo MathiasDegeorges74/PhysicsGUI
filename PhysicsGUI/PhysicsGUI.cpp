@@ -10,12 +10,39 @@
 int main()
 {
 
-	//window.setFramerateLimit(62);
 
 	sf::RenderWindow window(sf::VideoMode({ 1080, 720 }), "SFML works!");
 
-	// Created simulation body objects
+	//window.setFramerateLimit(62);
 
+	// Create simulation system
+
+	// Systeme parameters
+	double m = 1;	// [kg]
+	double k = 20;	// [N.m^-1]
+
+	// Initial condition
+	double x0 = 1;		// [m]
+
+	System system(m, k, x0);
+
+	Solution solutionExact(system);
+	Solution solutionEuler(system);
+	Solution solutionRK4(system);
+
+	solutionExact.setStepNumber(2);
+	solutionExact.setName("Exact");
+	solutionExact.initPosition();
+
+	solutionEuler.setStepNumber(40);
+	solutionEuler.setName("Euler");
+	solutionEuler.initPosition();
+
+	solutionRK4.setStepNumber(40);
+	solutionRK4.setName("RK4");
+	solutionRK4.initPosition();
+
+	// Created simulation body objects
 
 	sf::CircleShape circleExact(20.f);
 	sf::CircleShape circleRK4(20.f);
@@ -24,6 +51,7 @@ int main()
 	circleExact.setFillColor(sf::Color(255, 255, 255, 255));
 	circleRK4.setFillColor(sf::Color(0, 255, 0, 255));
 	circleEuler.setFillColor(sf::Color(255, 255, 0, 255));
+
 
 	sf::Font font("arial.ttf"); // Throws sf::Exception if an error occurs
 
@@ -37,8 +65,8 @@ int main()
 	textOFMax.setString("OFMax");
 
 	textFPS.setPosition(sf::Vector2f(100, 100));
-	textOF.setPosition(sf::Vector2f(500, 100));
-	textOFMax.setPosition(sf::Vector2f(500, 200));
+	textOF.setPosition(sf::Vector2f(100, 200));
+	textOFMax.setPosition(sf::Vector2f(100, 300));
 
 	// Body legends
 	sf::Text textExact(font);
@@ -49,15 +77,16 @@ int main()
 	textRK4.setString("RK4");
 	textEuler.setString("Euler");
 
-	textExact.setPosition(sf::Vector2f(200.0 + 100.0, 200.0));
-	textRK4.setPosition(sf::Vector2f(200.0 + 100.0, 300.0));
-	textEuler.setPosition(sf::Vector2f(200.0 + 100.0, 400.0));
+	textExact.setPosition(sf::Vector2f(540, 200.0));
+	textRK4.setPosition(sf::Vector2f(540, 300.0));
+	textEuler.setPosition(sf::Vector2f(540, 400.0));
 
 	textExact.setFillColor(sf::Color(255, 255, 255, 255));
 	textRK4.setFillColor(sf::Color(0, 255, 0, 255));
 	textEuler.setFillColor(sf::Color(255, 255, 0, 255));
 
 	float yExact(0.0), yEuler(0.0), yRK4(0.0);
+	float emExact(0.0), emEuler(0.0), emRK4(0.0);
 
 	// Timing features 
 	sf::Clock clockGeneral; // General time clock
@@ -67,14 +96,21 @@ int main()
 	sf::Time timeSinceLastFrame = clockFrame.restart();
 	sf::Time frameElapsedTime = clockFrame.getElapsedTime();
 
-	double fpsTarget = 62.0;
+	double fpsTarget = 60.0;
 	double frameTime = 1.0 / fpsTarget;
-	double fps=0;
+	double fps = 0;
 
 	double frameOverFlow = 0; // Track frame time filling compared to target FPS
 	double frameOverFlowMax = 0; // History of peak frame time filling compared to target FPS
 
 
+	// Stop before launch for stability
+	//while (elapsedTime.asSeconds() < 10)
+	//{
+	//	elapsedTime = clockGeneral.getElapsedTime();
+	//}
+	//elapsedTime = clockFrame.restart();
+	//timeSinceLastFrame = clockFrame.restart();
 
 	while (window.isOpen())
 	{
@@ -90,14 +126,41 @@ int main()
 				window.close();
 		}
 
-		yExact = sin(0.3 * elapsedTime.asSeconds() * 2 * std::numbers::pi + 0.5);
-		yRK4 = sin(0.5 * elapsedTime.asSeconds() * 2 * std::numbers::pi + 0.5);
-		yEuler = sin(0.4 * elapsedTime.asSeconds() * 2 * std::numbers::pi + 0.5);
 
-		circleExact.setPosition(sf::Vector2f(200.0 + 100.0 * yExact, 250.0));
-		circleRK4.setPosition(sf::Vector2f(200.0 + 100.0 * yRK4, 350.0));
-		circleEuler.setPosition(sf::Vector2f(200.0 + 100.0 * yEuler, 450.0));
+		solutionExact.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
+		solutionExact.initTimeRT();
+		solutionExact.solveExact();
+		solutionExact.calcEnergy();
 
+		solutionRK4.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
+		solutionRK4.initTimeRT();
+		solutionRK4.solveRK4();
+		solutionRK4.calcEnergy();
+		solutionRK4.nextStep();
+
+		solutionEuler.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
+		solutionEuler.initTimeRT();
+		solutionEuler.solveEuler();
+		solutionEuler.calcEnergy();
+		solutionEuler.nextStep();
+
+		yExact = solutionExact.getPosition();
+		yRK4 = solutionRK4.getPosition();
+		yEuler = solutionEuler.getPosition();
+
+		circleExact.setPosition(sf::Vector2f(540 + 100.0 * yExact, 250.0));
+		circleRK4.setPosition(sf::Vector2f(540 + 100.0 * yRK4, 350.0));
+		circleEuler.setPosition(sf::Vector2f(540 + 100.0 * yEuler, 450.0));
+
+
+		emExact = solutionExact.getEm();
+		emRK4 = solutionRK4.getEm();
+		emEuler = solutionEuler.getEm();
+
+		textExact.setString(std::format("Exact : {0:.5f}", emExact));
+		textRK4.setString(std::format("RK4 : {0:.5f}", emRK4));
+		textEuler.setString(std::format("Euler : {0:.5f}", emEuler));
+	
 
 		// Draw all elements
 		window.clear();
@@ -135,6 +198,5 @@ int main()
 			frameElapsedTime = clockFrame.getElapsedTime();
 			//std::cout << std::format("FET (micros s) : {0:.5f} \n", frameElapsedTime.asSeconds() * 1000.0);
 		}
-
 	}
 }
