@@ -135,7 +135,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Gauss.cpp" />
     <ClCompile Include="PhysicsGUI.cpp" />
+    <ClCompile Include="Solution.cpp" />
+    <ClCompile Include="System.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Gauss.hpp" />
+    <ClInclude Include="Solution.hpp" />
+    <ClInclude Include="System.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,4 +1,7 @@
 #include <SFML/Graphics.hpp>
+#include "Solution.hpp"
+#include "System.hpp"
+
 
 int main()
 {
