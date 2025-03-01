@@ -248,6 +248,11 @@ double Solution::getEm() const
 	return m_Em[m_n - 1];
 }
 
+double Solution::getFrequency() const
+{
+	return 1.0 / m_dt;
+}
+
 vector <double> Solution::getX()
 {
 	return m_x;

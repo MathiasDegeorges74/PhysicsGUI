@@ -34,11 +34,11 @@ int main()
 	solutionExact.setName("Exact");
 	solutionExact.initPosition();
 
-	solutionEuler.setStepNumber(100);
+	solutionEuler.setStepNumber(200);
 	solutionEuler.setName("Euler");
 	solutionEuler.initPosition();
 
-	solutionRK4.setStepNumber(100);
+	solutionRK4.setStepNumber(200);
 	solutionRK4.setName("RK4");
 	solutionRK4.initPosition();
 
@@ -85,8 +85,9 @@ int main()
 	textRK4.setFillColor(sf::Color(0, 255, 0, 255));
 	textEuler.setFillColor(sf::Color(255, 255, 0, 255));
 
-	float yExact(0.0), yEuler(0.0), yRK4(0.0);
-	float emExact(0.0), emEuler(0.0), emRK4(0.0);
+	double yExact(0.0), yEuler(0.0), yRK4(0.0);
+	double emExact(0.0), emEuler(0.0), emRK4(0.0);
+	double fExact(0.0), fEuler(0.0), fRK4(0.0);
 
 	// Timing features 
 	sf::Clock clockGeneral; // General time clock
@@ -107,8 +108,8 @@ int main()
 	{
 
 		elapsedTime = clockGeneral.getElapsedTime();
-
-		std::cout << std::format("new frame at {0:.5f} s\n", elapsedTime.asSeconds());
+		//std::cout << std::format("new frame at {0:.5f} s\n", elapsedTime.asSeconds());
+		// 
 		// Check time as the begginig of the frame computing 
 		timeSinceLastFrame = clockFrame.restart();
 		fps = 1.0 / timeSinceLastFrame.asSeconds();
@@ -152,9 +153,17 @@ int main()
 		emRK4 = solutionRK4.getEm();
 		emEuler = solutionEuler.getEm();
 
-		textExact.setString(std::format("Exact : {0:.5f}", emExact));
-		textRK4.setString(std::format("RK4 : {0:.5f}", emRK4));
-		textEuler.setString(std::format("Euler : {0:.5f}", emEuler));
+		fExact = solutionExact.getFrequency();
+		fRK4 = solutionRK4.getFrequency();
+		fEuler = solutionEuler.getFrequency();
+
+		textExact.setString(std::format("Exact	: {0:.3f}", emExact));
+		textRK4.setString(std::format("RK4	: {0:.3f}", emRK4));
+		textEuler.setString(std::format("Euler	: {0:.3f}", emEuler));
+
+		//textExact.setString(std::format("Exact {0:.2f}Hz : {0:.3f}", fExact, emExact));
+		//textRK4.setString(std::format("RK4 {0:.2f}Hz : {0:.3f}", fRK4, emRK4));
+		//textEuler.setString(std::format("Euler {0:.2f}Hz : {0:.3f}", fEuler, emEuler));
 
 
 		// Draw all elements
@@ -180,7 +189,7 @@ int main()
 
 		textOF.setString(std::format("Frame filling [%] : {:07.2f}", frameOverFlow));
 
-		if ((frameOverFlow > frameOverFlowMax) && (elapsedTime.asSeconds() > 2))
+		if ((frameOverFlow > frameOverFlowMax))
 		{
 			frameOverFlowMax = frameOverFlow;
 			textOFMax.setString(std::format("Frame filling [%] : {:07.2f}", frameOverFlowMax));
@@ -198,6 +207,7 @@ int main()
 			solutionExact.initPosition();
 			solutionRK4.initPosition();
 			solutionEuler.initPosition();
+			frameOverFlowMax = 0;
 			clockGeneral.restart();
 		}
 	}

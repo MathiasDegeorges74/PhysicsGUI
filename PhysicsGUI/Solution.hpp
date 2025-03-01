@@ -33,6 +33,7 @@ public:
 	void save(std::string const& filePath) const;
 	double getPosition() const;
 	double getEm() const;
+	double getFrequency() const;
 	std::vector <double> getX();
 	std::vector <double> getT();
 
