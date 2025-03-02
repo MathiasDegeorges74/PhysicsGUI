@@ -88,6 +88,8 @@ int main()
 	double yExact(0.0), yEuler(0.0), yRK4(0.0);
 	double emExact(0.0), emEuler(0.0), emRK4(0.0);
 	double fExact(0.0), fEuler(0.0), fRK4(0.0);
+	double tExact(0.0), tEuler(0.0), tRK4(0.0);
+
 
 	// Timing features 
 	sf::Clock clockGeneral; // General time clock
@@ -157,13 +159,22 @@ int main()
 		fRK4 = solutionRK4.getFrequency();
 		fEuler = solutionEuler.getFrequency();
 
+		tExact = solutionExact.getTime();
+		tRK4 = solutionRK4.getTime();
+		tEuler = solutionEuler.getTime();
+
+
 		textExact.setString(std::format("Exact	: {0:.3f}", emExact));
 		textRK4.setString(std::format("RK4	: {0:.3f}", emRK4));
 		textEuler.setString(std::format("Euler	: {0:.3f}", emEuler));
 
-		//textExact.setString(std::format("Exact {0:.2f}Hz : {0:.3f}", fExact, emExact));
-		//textRK4.setString(std::format("RK4 {0:.2f}Hz : {0:.3f}", fRK4, emRK4));
-		//textEuler.setString(std::format("Euler {0:.2f}Hz : {0:.3f}", fEuler, emEuler));
+		//textExact.setString(std::format("Time Exact	: {0:.3f}", tExact));
+		//textRK4.setString(std::format("Time RK4	: {0:.3f}", tRK4));
+		//textEuler.setString(std::format("Time Euler	: {0:.3f}", tEuler));
+
+		//textExact.setString(std::format("Frequency Exact: {0:.3f}", fExact));
+		//textRK4.setString(std::format("Frequency RK4: {0:.3f}", fRK4));
+		//textEuler.setString(std::format("Frequency Euler: {0:.3f}", fEuler));
 
 
 		// Draw all elements

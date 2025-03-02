@@ -253,6 +253,11 @@ double Solution::getFrequency() const
 	return 1.0 / m_dt;
 }
 
+double Solution::getTime() const
+{
+	return m_t[m_n - 1];
+}
+
 vector <double> Solution::getX()
 {
 	return m_x;
