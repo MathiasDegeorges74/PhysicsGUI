@@ -139,8 +139,6 @@ void Solution::setTimeTarget(double tEnd)
 	m_tEnd = tEnd;
 }
 
-
-
 void Solution::initPosition()
 {
 	m_x[0] = m_system.getInitialPosition();
@@ -148,6 +146,10 @@ void Solution::initPosition()
 
 	m_v[0] = 0;
 	m_v[m_n - 1] = m_v[0];
+
+	m_t[0] = 0;
+	m_t[m_n - 1] = m_t[0];
+
 }
 
 void Solution::updateInitialConditions()
@@ -193,23 +195,25 @@ void Solution::forward(double tEnd)
 	if (m_solverExact)
 	{
 		solveExact();
-		std::cout << m_x[0] << "	";
+		//std::cout << m_x[0] << "	";
 	}
 	else if (m_solverRK4)
 	{
 		solveRK4();
-		//std::cout << "Solving RK4 \n";
-		std::cout << m_x[0] << "	";
+		//std::cout << m_x[0] << "	";
 	}
 	else if (m_solverEuler)
 	{
 		solveEuler();
-		std::cout << m_x[0] << "	\n";
+		//std::cout << m_x[0] << "	\n";
 	}
 	else
 	{
 		std::cout << "no solver chosen for " << m_name << "\n";
 	}
+
+	//std::cout << "SUMMARY	" << m_name << "	: x0 = " << m_x[0] << "	xEnd = " << m_x[m_n - 1] << "	\n";
+
 	calcEnergy();
 }
 
@@ -225,6 +229,7 @@ void Solution::solveEuler()
 
 		m_v[i + 1] = m_v[i] + y[0] * m_dt;
 		m_x[i + 1] = m_x[i] + y[1] * m_dt; //+ 0.5 * ddx * dt * dt;
+
 	}
 
 }
@@ -245,7 +250,9 @@ void Solution::solveRK4()
 
 		m_x[i + 1] = m_x[i] + (m_dt / 6.) * (y1[1] + 2 * y2[1] + 2 * y3[1] + y4[1]);
 		m_v[i + 1] = m_v[i] + (m_dt / 6.) * (y1[0] + 2 * y2[0] + 2 * y3[0] + y4[0]);
+		//std::cout << m_name << "	-> t[" << i << "] = " << m_t[i] << " | x[" << i << "] = " << m_x[i] << "\n";
 	}
+	//std::cout << m_name << "	-> t[" << m_n - 1 << "] = " << m_t[m_n - 1] << " | x[" << m_n - 1 << "] = " << m_x[m_n - 1] << "\n";
 }
 
 void Solution::solveExact() {
@@ -256,8 +263,8 @@ void Solution::solveExact() {
 	for (int i = 0; i < m_n;i++)
 	{
 		m_x[i] = x0 * cos(sqrt(k / m) * m_t[i]);
+		//std::cout << m_name << "	-> t[" << i << "] = " << m_t[i] << " | x[" << i << "] = " << m_x[i] << "\n";
 		m_v[i] = -sqrt(k / m) * x0 * sin(sqrt(k / m) * m_t[i]);
-
 	}
 }
 
@@ -337,6 +344,9 @@ std::string Solution::getDetails() const
 	solutionDetails = std::format("Solution energy [J]	: {0:.3f}	", m_Em[m_n - 1]);
 	solutionDetails += format("Solution time [s]	: {0:.3f}	", m_t[m_n - 1]);
 	solutionDetails += format("Solution frequency [/s]	: {0:.3f}	", 1 / m_dt);
+
+	solutionDetails += format("x [m]	: {0:.5f}	", m_x[m_n-1]);
+	solutionDetails += format("v [m/s]	: {0:.5f}	", m_v[m_n - 1]);
 
 	return solutionDetails;
 }

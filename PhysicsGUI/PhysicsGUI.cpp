@@ -20,6 +20,7 @@ int main()
 	int characterSizeLegend = 30;
 	int spacementCounterHUD = 0;
 
+
 	// Create simulation system
 
 	// Systeme parameters
@@ -30,7 +31,7 @@ int main()
 	double x0 = 1;		// [m]
 
 	// Solver condition
-	int n = 40; // Make it work with 10000
+	int n = 2; // Make it work with 10000
 
 	System system(m, k, x0);
 
@@ -54,10 +55,13 @@ int main()
 	solutionRK4.initPosition();
 
 	// Created simulation body objects
+	sf::RectangleShape circleExact(sf::Vector2f({ 10.f,150.f }));
+	sf::RectangleShape circleRK4(sf::Vector2f({ 10.f,150.f }));
+	sf::RectangleShape circleEuler(sf::Vector2f({ 10.f,150.f }));
 
-	sf::CircleShape circleExact(20.f);
-	sf::CircleShape circleRK4(20.f);
-	sf::CircleShape circleEuler(20.f);
+	//sf::CircleShape circleExact(20.f);
+	//sf::CircleShape circleRK4(20.f);
+	//sf::CircleShape circleEuler(20.f);
 
 	circleExact.setFillColor(sf::Color(255, 255, 255, 255));
 	circleRK4.setFillColor(sf::Color(0, 255, 0, 255));
@@ -218,9 +222,9 @@ int main()
 		while (frameElapsedTime.asSeconds() < frameTime)
 		{
 			frameElapsedTime = clockFrame.getElapsedTime();
-			//std::cout << std::format("FET (micros s) : {0:.5f} \n", frameElapsedTime.asSeconds() * 1000.0);
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
+
+		while (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
 		{
 			solutionExact.initPosition();
 			solutionRK4.initPosition();
