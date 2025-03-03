@@ -93,34 +93,6 @@ Solution::Solution(System const& system, const double& t0, const double& tEnd, c
 
 Solution::~Solution() {}
 
-void Solution::forward(double tEnd)
-{
-	setTimeTarget(tEnd);
-	updateInitialConditions();
-	initTimeRT();
-
-	if (m_solverExact)
-	{
-		solveExact();
-		std::cout << m_x[0] << "	";
-	}
-	else if (m_solverRK4)
-	{
-		solveRK4();
-		//std::cout << "Solving RK4 \n";
-		std::cout << m_x[0] << "	";
-	}
-	else if (m_solverEuler)
-	{
-		solveEuler();
-		std::cout << m_x[0] << "	\n";
-	}
-	else
-	{
-		std::cout << "no solver chosen for " << m_name << "\n";
-	}
-	calcEnergy();
-}
 
 void Solution::setName(std::string name)
 {
@@ -151,15 +123,10 @@ void Solution::setSolver(std::string solver)
 	}
 }
 
-void Solution::setTimeBoundaries(double t0, double tEnd)
+void Solution::setStepNumber(int n)
+//Set step number and compute step time
 {
-	m_t0 = t0;
-	m_tEnd = tEnd;
-}
-
-void Solution::setTimeTarget(double tEnd)
-{
-	m_tEnd = tEnd;
+	m_n = n;
 }
 
 void Solution::setStepTime(double dt)
@@ -167,23 +134,12 @@ void Solution::setStepTime(double dt)
 	m_dt = dt;
 }
 
-void Solution::setStepNumber(int n)
-//Set step number and compute step time
+void Solution::setTimeTarget(double tEnd)
 {
-	m_n = n;
+	m_tEnd = tEnd;
 }
 
-void Solution::computeStepTime()
-{//compute step time from t0, tEnd and step number
-	// for n point -> n-1 steps
-	m_dt = (m_tEnd - m_t0) / double(m_n - 1);
-	//std::cout << m_name << " : dt = " << m_dt << "s\n";
-}
 
-void Solution::computeStepNumber()
-{//compute step number from t0, tEnd and step time
-	m_n = m_tEnd / m_dt;
-}
 
 void Solution::initPosition()
 {
@@ -192,15 +148,6 @@ void Solution::initPosition()
 
 	m_v[0] = 0;
 	m_v[m_n - 1] = m_v[0];
-}
-
-void Solution::nextStep()
-{
-	m_x[0] = m_x[m_n - 1];
-	m_v[0] = m_v[m_n - 1];
-	m_t[0] = m_x[m_n - 1];
-	m_t0 = m_t[0];
-	//std::cout << m_name << " : x0 = " << m_x[0] << "m\n";
 }
 
 void Solution::updateInitialConditions()
@@ -213,17 +160,6 @@ void Solution::updateInitialConditions()
 	//std::cout << m_name << " : x0 = " << m_x[0] << "m\n";
 }
 
-
-void Solution::initTime()
-{
-	computeStepNumber();
-	m_t[0] = m_t0;
-	for (int i = 0; i < m_n - 1;i++)
-	{
-		m_t[i + 1] = m_t[i] + m_dt;
-	}
-}
-
 void Solution::initTimeRT()
 {
 	computeStepTime();
@@ -232,6 +168,49 @@ void Solution::initTimeRT()
 	{
 		m_t[i + 1] = m_t[i] + m_dt;
 	}
+}
+
+void Solution::computeStepNumber()
+{//compute step number from t0, tEnd and step time
+	m_n = m_tEnd / m_dt;
+}
+
+void Solution::computeStepTime()
+{//compute step time from t0, tEnd and step number
+	// for n point -> n-1 steps
+	m_dt = (m_tEnd - m_t0) / double(m_n - 1);
+	//std::cout << m_name << " : dt = " << m_dt << "s\n";
+}
+
+
+
+void Solution::forward(double tEnd)
+{
+	setTimeTarget(tEnd);
+	updateInitialConditions();
+	initTimeRT();
+
+	if (m_solverExact)
+	{
+		solveExact();
+		std::cout << m_x[0] << "	";
+	}
+	else if (m_solverRK4)
+	{
+		solveRK4();
+		//std::cout << "Solving RK4 \n";
+		std::cout << m_x[0] << "	";
+	}
+	else if (m_solverEuler)
+	{
+		solveEuler();
+		std::cout << m_x[0] << "	\n";
+	}
+	else
+	{
+		std::cout << "no solver chosen for " << m_name << "\n";
+	}
+	calcEnergy();
 }
 
 void Solution::solveEuler()
@@ -295,6 +274,8 @@ void Solution::calcEnergy()
 		m_Em[i] = m_Ec[i] + m_Es[i];
 	}
 }
+
+
 
 void Solution::save(string const& filePath) const
 {

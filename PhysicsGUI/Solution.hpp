@@ -23,15 +23,12 @@ public:
 	void calcEnergy();
 	void setName(std::string name);
 	void setTimeTarget(double tEnd);
-	void setTimeBoundaries(double t0, double tEnd);
 	void setStepTime(double dt);
 	void setStepNumber(int n);
 	void setSolver(std::string solver);
 	void computeStepTime();
 	void computeStepNumber();
-	void nextStep();
 	void updateInitialConditions();
-	void initTime();
 	void initPosition();
 	void initTimeRT();
 	void save(std::string const& filePath) const;
