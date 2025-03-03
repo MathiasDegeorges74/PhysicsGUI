@@ -9,6 +9,19 @@ using namespace std;
 
 #include "Gauss.hpp"
 
+bool compareStrings(std::string& str1, std::string& str2)
+{
+	if (str1.length() != str2.length())
+		return false;
+
+	for (int i = 0; i < str1.length(); ++i) {
+		if (tolower(str1[i]) != tolower(str2[i]))
+			return false;
+	}
+
+	return true;
+}
+
 void solveSystem(double y[N], double const& k, double const& m, double const& x, double const& v)
 {
 
@@ -48,6 +61,10 @@ Solution::Solution(System const& system, const double& t0, const double& tEnd, c
 	//m_dt = 0.005; //[s]
 	m_n = m_tEnd / m_dt;
 
+	m_solverExact = false;
+	m_solverRK4 = false;
+	m_solverEuler = false;
+
 	// Time variable initialisation initialisation
 	m_t = vector <double>(m_n, 0);
 	m_x = vector <double>(m_n, 0);
@@ -67,18 +84,70 @@ Solution::Solution(System const& system, const double& t0, const double& tEnd, c
 
 	//cout << "Solution initialisation done" << endl;
 
-	for (int i = 0; i < m_n - 1;i++)
-	{
-		m_t[i + 1] = m_t[i] + m_dt;
-	}
+	//for (int i = 0; i < m_n - 1;i++)
+	//{
+	//	m_t[i + 1] = m_t[i] + m_dt;
+	//}
 
 }
 
 Solution::~Solution() {}
 
+void Solution::forward(double tEnd)
+{
+	setTimeTarget(tEnd);
+	updateInitialConditions();
+	initTimeRT();
+
+	std::cout << m_solverRK4;
+
+	if (m_solverExact)
+	{
+		solveExact();
+	}
+	else if (m_solverRK4)
+	{
+		solveRK4();
+		//std::cout << "Solving RK4 \n";
+	}
+	else if (m_solverEuler)
+	{
+		solveEuler();
+	}
+	else
+	{
+		std::cout << "no solver chosen \n";
+	}
+	calcEnergy();
+}
+
 void Solution::setName(std::string name)
 {
 	m_name = name;
+}
+
+void Solution::setSolver(std::string solver)
+{
+	std::string flagExact = "EXACT";
+	std::string flagRK4 = "RK4";
+	std::string flagEuler = "EULER";
+
+	m_solverExact = false;
+	m_solverRK4 = false;
+	m_solverEuler = false;
+
+	if (compareStrings(solver, flagExact))
+	{
+		m_solverExact = true;
+	}
+	else if (compareStrings(solver, flagRK4))
+	{
+		m_solverRK4 = true;
+	}
+	else if (compareStrings(solver, flagEuler))
+	{
+		m_solverEuler = true;
+	}
 }
 
 void Solution::setTimeBoundaries(double t0, double tEnd)
@@ -106,7 +175,7 @@ void Solution::setStepNumber(int n)
 void Solution::computeStepTime()
 {//compute step time from t0, tEnd and step number
 	// for n point -> n-1 steps
-	m_dt = (m_tEnd - m_t0) / double(m_n-1);
+	m_dt = (m_tEnd - m_t0) / double(m_n - 1);
 	//std::cout << m_name << " : dt = " << m_dt << "s\n";
 }
 
@@ -118,17 +187,31 @@ void Solution::computeStepNumber()
 void Solution::initPosition()
 {
 	m_x[0] = m_system.getInitialPosition();
+	m_x[m_n - 1] = m_x[0];
+
 	m_v[0] = 0;
+	m_v[m_n - 1] = m_v[0];
 }
 
 void Solution::nextStep()
 {
 	m_x[0] = m_x[m_n - 1];
 	m_v[0] = m_v[m_n - 1];
-	//m_t[0] = m_x[m_n - 1];
-	//m_t0 = m_t[0];
+	m_t[0] = m_x[m_n - 1];
+	m_t0 = m_t[0];
 	//std::cout << m_name << " : x0 = " << m_x[0] << "m\n";
 }
+
+void Solution::updateInitialConditions()
+{
+	m_x[0] = m_x[m_n - 1];
+	m_v[0] = m_v[m_n - 1];
+
+	m_t[0] = m_t[m_n - 1];
+	m_t0 = m_t[0];
+	//std::cout << m_name << " : x0 = " << m_x[0] << "m\n";
+}
+
 
 void Solution::initTime()
 {
@@ -269,9 +352,9 @@ double Solution::getTime() const
 std::string Solution::getDetails() const
 {
 	std::string solutionDetails;
-	solutionDetails = std::format("Solution energy [J]	: {0:.3f}	", m_Em[m_n-1]);
+	solutionDetails = std::format("Solution energy [J]	: {0:.3f}	", m_Em[m_n - 1]);
 	solutionDetails += format("Solution time [s]	: {0:.3f}	", m_t[m_n - 1]);
-	solutionDetails += format("Solution frequency [/s]	: {0:.3f}	", 1/m_dt);
+	solutionDetails += format("Solution frequency [/s]	: {0:.3f}	", 1 / m_dt);
 
 	return solutionDetails;
 }

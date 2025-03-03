@@ -16,6 +16,7 @@ class Solution {
 public:
 	Solution(System const& system, const double& t0 = 0.0, const double& tEnd = 1.0, const double& dt = 0.001);
 	~Solution();
+	void forward(double tEnd);
 	void solveEuler();
 	void solveRK4();
 	void solveExact();
@@ -25,9 +26,11 @@ public:
 	void setTimeBoundaries(double t0, double tEnd);
 	void setStepTime(double dt);
 	void setStepNumber(int n);
+	void setSolver(std::string solver);
 	void computeStepTime();
 	void computeStepNumber();
 	void nextStep();
+	void updateInitialConditions();
 	void initTime();
 	void initPosition();
 	void initTimeRT();
@@ -47,6 +50,9 @@ protected:
 	double m_tEnd;		//[s]
 	double m_dt;		//[s]
 	int m_n;			//[-]
+	bool m_solverExact;		// 0 : exact	|	1 : RK4	|	2 : Euler	 
+	bool m_solverRK4;
+	bool m_solverEuler;
 
 	std::vector <double> m_t;
 	std::vector <double> m_x;
@@ -65,5 +71,6 @@ double calcNext_dx(const double& v);
 
 void solveSystem(double y[N], double const& k, double const& m, double const& x, double const& v);
 
+bool compareStrings(std::string& str1, std::string& str2);
 
 #endif // DEF_SOLUTION

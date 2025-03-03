@@ -40,14 +40,17 @@ int main()
 
 	solutionExact.setStepNumber(100);
 	solutionExact.setName("Exact");
+	solutionExact.setSolver("EXACT");
 	solutionExact.initPosition();
 
 	solutionEuler.setStepNumber(100);
 	solutionEuler.setName("Euler");
+	solutionEuler.setSolver("EULER");
 	solutionEuler.initPosition();
 
 	solutionRK4.setStepNumber(100);
 	solutionRK4.setName("RK4");
+	solutionRK4.setSolver("RK4");
 	solutionRK4.initPosition();
 
 	// Created simulation body objects
@@ -162,12 +165,12 @@ int main()
 		solutionExact.solveExact();
 		solutionExact.calcEnergy();
 
-		solutionRK4.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
-		//solutionRK4.setTimeTarget(elapsedTime.asSeconds() + frameTime);
-		solutionRK4.initTimeRT();
-		solutionRK4.solveRK4();
-		solutionRK4.calcEnergy();
-		solutionRK4.nextStep();
+		//solutionRK4.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
+		solutionRK4.forward(elapsedTime.asSeconds() + frameTime);
+		//solutionRK4.initTimeRT();
+		//solutionRK4.solveRK4();
+		//solutionRK4.calcEnergy();
+		//solutionRK4.nextStep();
 
 		solutionEuler.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
 		solutionEuler.initTimeRT();
