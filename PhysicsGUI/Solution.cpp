@@ -102,15 +102,18 @@ void Solution::forward(double tEnd)
 	if (m_solverExact)
 	{
 		solveExact();
+		std::cout << m_x[0] << "	";
 	}
 	else if (m_solverRK4)
 	{
 		solveRK4();
 		//std::cout << "Solving RK4 \n";
+		std::cout << m_x[0] << "	";
 	}
 	else if (m_solverEuler)
 	{
 		solveEuler();
+		std::cout << m_x[0] << "	\n";
 	}
 	else
 	{

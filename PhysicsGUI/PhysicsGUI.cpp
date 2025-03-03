@@ -124,9 +124,9 @@ int main()
 
 	// Timing features 
 	sf::Clock clockGeneral; // General time clock
-	sf::Time elapsedTime = clockGeneral.getElapsedTime();
-
 	sf::Clock clockFrame; // Frame time clock
+
+	sf::Time elapsedTime = clockGeneral.getElapsedTime();
 	sf::Time timeSinceLastFrame = clockFrame.restart();
 	sf::Time frameElapsedTime = clockFrame.getElapsedTime();
 
@@ -137,14 +137,15 @@ int main()
 	double frameOverFlow = 0; // Track frame time filling compared to target FPS
 	double frameOverFlowMax = 0; // History of peak frame time filling compared to target FPS
 
+	double nextStepTime = 0;
+
 	while (window.isOpen())
 	{
 
+		// Check time as the begginig of the frame computing
 		elapsedTime = clockGeneral.getElapsedTime();
-		//std::cout << std::format("new frame at {0:.5f} s\n", elapsedTime.asSeconds());
-		// 
-		// Check time as the begginig of the frame computing 
 		timeSinceLastFrame = clockFrame.restart();
+
 		fps = 1.0 / timeSinceLastFrame.asSeconds();
 		textFramePerSecond.setString(std::format("FPS : {0:.5f}", fps));
 
@@ -156,26 +157,11 @@ int main()
 			}
 		}
 
-		solutionExact.forward(elapsedTime.asSeconds() + frameTime);
-		//solutionExact.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
-		//solutionExact.initTimeRT();
-		//solutionExact.solveExact();
-		//solutionExact.calcEnergy();
+		nextStepTime = elapsedTime.asSeconds() + frameTime;
 
-		solutionRK4.forward(elapsedTime.asSeconds() + frameTime);
-		//solutionRK4.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
-		//solutionRK4.initTimeRT();
-		//solutionRK4.solveRK4();
-		//solutionRK4.calcEnergy();
-		//solutionRK4.nextStep();
-
-
-		solutionEuler.forward(elapsedTime.asSeconds() + frameTime);
-		//solutionEuler.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
-		//solutionEuler.initTimeRT();
-		//solutionEuler.solveEuler();
-		//solutionEuler.calcEnergy();
-		//solutionEuler.nextStep();
+		solutionExact.forward(nextStepTime);
+		solutionRK4.forward(nextStepTime);
+		solutionEuler.forward(nextStepTime);
 
 		yExact = solutionExact.getPosition();
 		yRK4 = solutionRK4.getPosition();
@@ -185,14 +171,12 @@ int main()
 		circleRK4.setPosition(sf::Vector2f(540 + 100.0 * yRK4, 350.0));
 		circleEuler.setPosition(sf::Vector2f(540 + 100.0 * yEuler, 450.0));
 
-
 		textDetailsExact.setString(solutionExact.getDetails());
 		textDetailsRK4.setString(solutionRK4.getDetails());
 		textDetailsEuler.setString(solutionEuler.getDetails());
 
 		// Draw all elements
 		window.clear();
-
 
 		window.draw(circleExact);
 		window.draw(circleRK4);
@@ -213,11 +197,9 @@ int main()
 			window.draw(textDetailsEuler);
 			window.draw(textDetailsRK4);
 
-
 		}
 
 		window.display();
-
 
 		// Check 
 		frameElapsedTime = clockFrame.getElapsedTime();
