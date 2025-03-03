@@ -13,7 +13,12 @@ int main()
 
 	sf::RenderWindow window(sf::VideoMode({ 1080, 720 }), "SFML works!");
 
-	//window.setFramerateLimit(62);
+	//Test parameters
+	sf::Font font("arial.ttf"); // Throws sf::Exception if an error occurs
+
+	int characterSizeHUD = 15;
+	int characterSizeLegend = 30;
+	int spacementCounterHUD = 0;
 
 	// Create simulation system
 
@@ -24,21 +29,24 @@ int main()
 	// Initial condition
 	double x0 = 1;		// [m]
 
+	// Solver condition
+	int n = 1000; // Make it work with 10000
+
 	System system(m, k, x0);
 
 	Solution solutionExact(system);
 	Solution solutionEuler(system);
 	Solution solutionRK4(system);
 
-	solutionExact.setStepNumber(4);
+	solutionExact.setStepNumber(n);
 	solutionExact.setName("Exact");
 	solutionExact.initPosition();
 
-	solutionEuler.setStepNumber(200);
+	solutionEuler.setStepNumber(100);
 	solutionEuler.setName("Euler");
 	solutionEuler.initPosition();
 
-	solutionRK4.setStepNumber(200);
+	solutionRK4.setStepNumber(n);
 	solutionRK4.setName("RK4");
 	solutionRK4.initPosition();
 
@@ -53,20 +61,44 @@ int main()
 	circleEuler.setFillColor(sf::Color(255, 255, 0, 255));
 
 
-	sf::Font font("arial.ttf"); // Throws sf::Exception if an error occurs
-
 	// HUD text
-	sf::Text textFPS(font);
-	sf::Text textOF(font);
-	sf::Text textOFMax(font);
+	sf::Text textFramePerSecond(font);
+	sf::Text textFrameFilling(font);
+	sf::Text textFrameFillingMax(font);
 
-	textFPS.setString("FPS");
-	textOF.setString("OF");
-	textOFMax.setString("OFMax");
+	textFramePerSecond.setString("FPS");
+	textFrameFilling.setString("OF");
+	textFrameFillingMax.setString("OFMax");
 
-	textFPS.setPosition(sf::Vector2f(100, 100));
-	textOF.setPosition(sf::Vector2f(100, 200));
-	textOFMax.setPosition(sf::Vector2f(100, 300));
+	textFramePerSecond.setPosition(sf::Vector2f(0, spacementCounterHUD += characterSizeHUD));
+	textFrameFilling.setPosition(sf::Vector2f(0, spacementCounterHUD += characterSizeHUD));
+	textFrameFillingMax.setPosition(sf::Vector2f(0, spacementCounterHUD += characterSizeHUD));
+
+
+	textFramePerSecond.setCharacterSize(characterSizeHUD);
+	textFrameFilling.setCharacterSize(characterSizeHUD);
+	textFrameFillingMax.setCharacterSize(characterSizeHUD);
+
+	// Solution details texts
+	sf::Text textDetailsExact(font);
+	sf::Text textDetailsRK4(font);
+	sf::Text textDetailsEuler(font);
+
+	textDetailsExact.setString("FPS");
+	textDetailsRK4.setString("OF");
+	textDetailsEuler.setString("OFMax");
+
+	textDetailsExact.setPosition(sf::Vector2f(0, spacementCounterHUD += characterSizeHUD));
+	textDetailsRK4.setPosition(sf::Vector2f(0, spacementCounterHUD += characterSizeHUD));
+	textDetailsEuler.setPosition(sf::Vector2f(0, spacementCounterHUD += characterSizeHUD));
+
+	textDetailsExact.setFillColor(sf::Color(255, 255, 255, 255));
+	textDetailsRK4.setFillColor(sf::Color(0, 255, 0, 255));
+	textDetailsEuler.setFillColor(sf::Color(255, 255, 0, 255));
+
+	textDetailsExact.setCharacterSize(characterSizeHUD);
+	textDetailsRK4.setCharacterSize(characterSizeHUD);
+	textDetailsEuler.setCharacterSize(characterSizeHUD);
 
 	// Body legends
 	sf::Text textExact(font);
@@ -115,7 +147,7 @@ int main()
 		// Check time as the begginig of the frame computing 
 		timeSinceLastFrame = clockFrame.restart();
 		fps = 1.0 / timeSinceLastFrame.asSeconds();
-		textFPS.setString(std::format("FPS : {0:.5f}", fps));
+		textFramePerSecond.setString(std::format("FPS : {0:.5f}", fps));
 
 		while (const std::optional event = window.pollEvent())
 		{
@@ -163,6 +195,9 @@ int main()
 		tRK4 = solutionRK4.getTime();
 		tEuler = solutionEuler.getTime();
 
+		textDetailsExact.setString(solutionExact.getDetails());
+		textDetailsRK4.setString(solutionRK4.getDetails());
+		textDetailsEuler.setString(solutionEuler.getDetails());
 
 		textExact.setString(std::format("Exact	: {0:.3f}", emExact));
 		textRK4.setString(std::format("RK4	: {0:.3f}", emRK4));
@@ -179,9 +214,7 @@ int main()
 
 		// Draw all elements
 		window.clear();
-		window.draw(textFPS);
-		window.draw(textOF);
-		window.draw(textOFMax);
+
 
 		window.draw(circleExact);
 		window.draw(circleRK4);
@@ -191,6 +224,20 @@ int main()
 		window.draw(textEuler);
 		window.draw(textRK4);
 
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F3))
+		{
+			window.draw(textFramePerSecond);
+			window.draw(textFrameFilling);
+			window.draw(textFrameFillingMax);
+
+			window.draw(textDetailsExact);
+			window.draw(textDetailsEuler);
+			window.draw(textDetailsRK4);
+
+
+		}
+
 		window.display();
 
 
@@ -198,12 +245,12 @@ int main()
 		frameElapsedTime = clockFrame.getElapsedTime();
 		frameOverFlow = frameElapsedTime.asSeconds() / frameTime * 100.0;
 
-		textOF.setString(std::format("Frame filling [%] : {:07.2f}", frameOverFlow));
+		textFrameFilling.setString(std::format("Frame filling [%] : {:07.2f}", frameOverFlow));
 
 		if ((frameOverFlow > frameOverFlowMax))
 		{
 			frameOverFlowMax = frameOverFlow;
-			textOFMax.setString(std::format("Frame filling [%] : {:07.2f}", frameOverFlowMax));
+			textFrameFillingMax.setString(std::format("Frame filling max [%] : {:07.2f}", frameOverFlowMax));
 		}
 
 		// Stabilise the FPS by waiting before starting the next frame computing

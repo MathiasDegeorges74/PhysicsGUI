@@ -258,6 +258,16 @@ double Solution::getTime() const
 	return m_t[m_n - 1];
 }
 
+std::string Solution::getDetails() const
+{
+	std::string solutionDetails;
+	solutionDetails = std::format("Solution energy [J]	: {0:.3f}	", m_Em[m_n-1]);
+	solutionDetails += format("Solution time [s]	: {0:.3f}	", m_t[m_n - 1]);
+	solutionDetails += format("Solution frequency [/s]	: {0:.3f}	", 1/m_dt);
+
+	return solutionDetails;
+}
+
 vector <double> Solution::getX()
 {
 	return m_x;

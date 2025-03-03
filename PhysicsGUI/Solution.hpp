@@ -35,6 +35,7 @@ public:
 	double getEm() const;
 	double getFrequency() const;
 	double getTime() const;
+	std::string getDetails() const;
 	std::vector <double> getX();
 	std::vector <double> getT();
 
