@@ -21,6 +21,7 @@ public:
 	void solveExact();
 	void calcEnergy();
 	void setName(std::string name);
+	void setTimeTarget(double tEnd);
 	void setTimeBoundaries(double t0, double tEnd);
 	void setStepTime(double dt);
 	void setStepNumber(int n);

@@ -30,7 +30,7 @@ int main()
 	double x0 = 1;		// [m]
 
 	// Solver condition
-	int n = 1000; // Make it work with 10000
+	int n = 100; // Make it work with 10000
 
 	System system(m, k, x0);
 
@@ -38,7 +38,7 @@ int main()
 	Solution solutionEuler(system);
 	Solution solutionRK4(system);
 
-	solutionExact.setStepNumber(n);
+	solutionExact.setStepNumber(100);
 	solutionExact.setName("Exact");
 	solutionExact.initPosition();
 
@@ -46,7 +46,7 @@ int main()
 	solutionEuler.setName("Euler");
 	solutionEuler.initPosition();
 
-	solutionRK4.setStepNumber(n);
+	solutionRK4.setStepNumber(100);
 	solutionRK4.setName("RK4");
 	solutionRK4.initPosition();
 
@@ -163,6 +163,7 @@ int main()
 		solutionExact.calcEnergy();
 
 		solutionRK4.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
+		//solutionRK4.setTimeTarget(elapsedTime.asSeconds() + frameTime);
 		solutionRK4.initTimeRT();
 		solutionRK4.solveRK4();
 		solutionRK4.calcEnergy();

@@ -87,6 +87,11 @@ void Solution::setTimeBoundaries(double t0, double tEnd)
 	m_tEnd = tEnd;
 }
 
+void Solution::setTimeTarget(double tEnd)
+{
+	m_tEnd = tEnd;
+}
+
 void Solution::setStepTime(double dt)
 {//Set step time
 	m_dt = dt;
@@ -100,7 +105,8 @@ void Solution::setStepNumber(int n)
 
 void Solution::computeStepTime()
 {//compute step time from t0, tEnd and step number
-	m_dt = (m_tEnd - m_t0) / double(m_n);
+	// for n point -> n-1 steps
+	m_dt = (m_tEnd - m_t0) / double(m_n-1);
 	//std::cout << m_name << " : dt = " << m_dt << "s\n";
 }
 
@@ -119,6 +125,8 @@ void Solution::nextStep()
 {
 	m_x[0] = m_x[m_n - 1];
 	m_v[0] = m_v[m_n - 1];
+	//m_t[0] = m_x[m_n - 1];
+	//m_t0 = m_t[0];
 	//std::cout << m_name << " : x0 = " << m_x[0] << "m\n";
 }
 
