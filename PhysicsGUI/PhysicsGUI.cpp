@@ -30,7 +30,7 @@ int main()
 	double x0 = 1;		// [m]
 
 	// Solver condition
-	int n = 100; // Make it work with 10000
+	int n = 40; // Make it work with 10000
 
 	System system(m, k, x0);
 
@@ -38,17 +38,17 @@ int main()
 	Solution solutionEuler(system);
 	Solution solutionRK4(system);
 
-	solutionExact.setStepNumber(100);
+	solutionExact.setStepNumber(n);
 	solutionExact.setName("Exact");
 	solutionExact.setSolver("EXACT");
 	solutionExact.initPosition();
 
-	solutionEuler.setStepNumber(100);
+	solutionEuler.setStepNumber(n);
 	solutionEuler.setName("Euler");
 	solutionEuler.setSolver("EULER");
 	solutionEuler.initPosition();
 
-	solutionRK4.setStepNumber(100);
+	solutionRK4.setStepNumber(n);
 	solutionRK4.setName("RK4");
 	solutionRK4.setSolver("RK4");
 	solutionRK4.initPosition();
@@ -121,10 +121,6 @@ int main()
 	textEuler.setFillColor(sf::Color(255, 255, 0, 255));
 
 	double yExact(0.0), yEuler(0.0), yRK4(0.0);
-	double emExact(0.0), emEuler(0.0), emRK4(0.0);
-	double fExact(0.0), fEuler(0.0), fRK4(0.0);
-	double tExact(0.0), tEuler(0.0), tRK4(0.0);
-
 
 	// Timing features 
 	sf::Clock clockGeneral; // General time clock
@@ -160,23 +156,26 @@ int main()
 			}
 		}
 
-		solutionExact.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
-		solutionExact.initTimeRT();
-		solutionExact.solveExact();
-		solutionExact.calcEnergy();
+		solutionExact.forward(elapsedTime.asSeconds() + frameTime);
+		//solutionExact.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
+		//solutionExact.initTimeRT();
+		//solutionExact.solveExact();
+		//solutionExact.calcEnergy();
 
-		//solutionRK4.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
 		solutionRK4.forward(elapsedTime.asSeconds() + frameTime);
+		//solutionRK4.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
 		//solutionRK4.initTimeRT();
 		//solutionRK4.solveRK4();
 		//solutionRK4.calcEnergy();
 		//solutionRK4.nextStep();
 
-		solutionEuler.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
-		solutionEuler.initTimeRT();
-		solutionEuler.solveEuler();
-		solutionEuler.calcEnergy();
-		solutionEuler.nextStep();
+
+		solutionEuler.forward(elapsedTime.asSeconds() + frameTime);
+		//solutionEuler.setTimeBoundaries(elapsedTime.asSeconds(), elapsedTime.asSeconds() + frameTime);
+		//solutionEuler.initTimeRT();
+		//solutionEuler.solveEuler();
+		//solutionEuler.calcEnergy();
+		//solutionEuler.nextStep();
 
 		yExact = solutionExact.getPosition();
 		yRK4 = solutionRK4.getPosition();
@@ -187,34 +186,9 @@ int main()
 		circleEuler.setPosition(sf::Vector2f(540 + 100.0 * yEuler, 450.0));
 
 
-		emExact = solutionExact.getEm();
-		emRK4 = solutionRK4.getEm();
-		emEuler = solutionEuler.getEm();
-
-		fExact = solutionExact.getFrequency();
-		fRK4 = solutionRK4.getFrequency();
-		fEuler = solutionEuler.getFrequency();
-
-		tExact = solutionExact.getTime();
-		tRK4 = solutionRK4.getTime();
-		tEuler = solutionEuler.getTime();
-
 		textDetailsExact.setString(solutionExact.getDetails());
 		textDetailsRK4.setString(solutionRK4.getDetails());
 		textDetailsEuler.setString(solutionEuler.getDetails());
-
-		textExact.setString(std::format("Exact	: {0:.3f}", emExact));
-		textRK4.setString(std::format("RK4	: {0:.3f}", emRK4));
-		textEuler.setString(std::format("Euler	: {0:.3f}", emEuler));
-
-		//textExact.setString(std::format("Time Exact	: {0:.3f}", tExact));
-		//textRK4.setString(std::format("Time RK4	: {0:.3f}", tRK4));
-		//textEuler.setString(std::format("Time Euler	: {0:.3f}", tEuler));
-
-		//textExact.setString(std::format("Frequency Exact: {0:.3f}", fExact));
-		//textRK4.setString(std::format("Frequency RK4: {0:.3f}", fRK4));
-		//textEuler.setString(std::format("Frequency Euler: {0:.3f}", fEuler));
-
 
 		// Draw all elements
 		window.clear();

@@ -99,8 +99,6 @@ void Solution::forward(double tEnd)
 	updateInitialConditions();
 	initTimeRT();
 
-	std::cout << m_solverRK4;
-
 	if (m_solverExact)
 	{
 		solveExact();
@@ -116,7 +114,7 @@ void Solution::forward(double tEnd)
 	}
 	else
 	{
-		std::cout << "no solver chosen \n";
+		std::cout << "no solver chosen for " << m_name << "\n";
 	}
 	calcEnergy();
 }
