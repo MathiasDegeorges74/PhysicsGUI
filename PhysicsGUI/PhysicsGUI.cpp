@@ -11,7 +11,10 @@ int main()
 {
 
 
+
+
 	sf::RenderWindow window(sf::VideoMode({ 1080, 720 }), "SFML works!");
+	sf::Vector2u size = window.getSize();
 
 	//Test parameters
 	sf::Font font("arial.ttf"); // Throws sf::Exception if an error occurs
@@ -31,7 +34,7 @@ int main()
 	double x0 = 1;		// [m]
 
 	// Solver condition
-	int n = 2; // Make it work with 10000
+	int n = 10; // Make it work with 10000
 
 	System system(m, k, x0);
 
@@ -58,14 +61,27 @@ int main()
 	sf::RectangleShape circleExact(sf::Vector2f({ 10.f,150.f }));
 	sf::RectangleShape circleRK4(sf::Vector2f({ 10.f,150.f }));
 	sf::RectangleShape circleEuler(sf::Vector2f({ 10.f,150.f }));
-
 	//sf::CircleShape circleExact(20.f);
 	//sf::CircleShape circleRK4(20.f);
 	//sf::CircleShape circleEuler(20.f);
 
-	circleExact.setFillColor(sf::Color(255, 255, 255, 255));
-	circleRK4.setFillColor(sf::Color(0, 255, 0, 255));
-	circleEuler.setFillColor(sf::Color(255, 255, 0, 255));
+	sf::VertexArray lineExact;
+	sf::VertexArray lineRK4;
+	sf::VertexArray lineEuler;
+
+	int xLine = 0;
+	lineExact.setPrimitiveType(sf::PrimitiveType::LineStrip);
+	lineRK4.setPrimitiveType(sf::PrimitiveType::LineStrip);
+	lineEuler.setPrimitiveType(sf::PrimitiveType::LineStrip);
+
+
+	sf::Color colorExact(255, 255, 255, 255);
+	sf::Color colorRK4(0, 255, 0, 255);
+	sf::Color colorEuler(255, 255, 0, 255);
+
+	circleExact.setFillColor(colorExact);
+	circleRK4.setFillColor(colorRK4);
+	circleEuler.setFillColor(colorEuler);
 
 
 	// HUD text
@@ -143,6 +159,8 @@ int main()
 
 	double nextStepTime = 0;
 
+	//int x = 0;
+
 	while (window.isOpen())
 	{
 
@@ -171,6 +189,24 @@ int main()
 		yRK4 = solutionRK4.getPosition();
 		yEuler = solutionEuler.getPosition();
 
+		//line[x] = sf::Vertex(sf::Vector2f(nextStepTime, yExact));
+
+
+		// Modulo line x coordinate to stay in the window 
+		xLine = int(nextStepTime * 60.0) % size.x;
+		if (xLine < 1)
+		{
+			lineExact.clear();
+			lineRK4.clear();
+			lineEuler.clear();
+		}
+
+
+		lineExact.append(sf::Vertex(sf::Vector2f(xLine, 250 + yExact * 100), colorExact));
+		lineRK4.append(sf::Vertex(sf::Vector2f(xLine, 250 + yRK4 * 100), colorRK4));
+		lineEuler.append(sf::Vertex(sf::Vector2f(xLine, 250 + yEuler * 100), colorEuler));
+
+
 		circleExact.setPosition(sf::Vector2f(540 + 100.0 * yExact, 250.0));
 		circleRK4.setPosition(sf::Vector2f(540 + 100.0 * yRK4, 350.0));
 		circleEuler.setPosition(sf::Vector2f(540 + 100.0 * yEuler, 450.0));
@@ -190,6 +226,12 @@ int main()
 		window.draw(textEuler);
 		window.draw(textRK4);
 
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L))
+		{
+			window.draw(lineExact);
+			window.draw(lineRK4);
+			window.draw(lineEuler);
+		}
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F3))
 		{
@@ -204,7 +246,7 @@ int main()
 		}
 
 		window.display();
-
+		//x++;
 		// Check 
 		frameElapsedTime = clockFrame.getElapsedTime();
 		frameOverFlow = frameElapsedTime.asSeconds() / frameTime * 100.0;
@@ -231,6 +273,10 @@ int main()
 			solutionEuler.initPosition();
 			frameOverFlowMax = 0;
 			clockGeneral.restart();
+			lineExact.clear();
+			lineRK4.clear();
+			lineEuler.clear();
+			//x = 0;
 		}
 	}
 }
